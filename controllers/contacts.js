@@ -6,14 +6,12 @@ const { ctrlWrapper } = require("../helpers/ctrlWrapper.js");
 const { Contact } = require("../models/contact.js");
 
 const getAllContacts = async (req, res) => {
-  //   const result = await contacts.listContacts();
   const result = await Contact.find({}, "-createdAt -updatedAt ");
   res.json(result);
 };
 
 const getById = async (req, res) => {
   const { contactId } = req.params;
-  // const result = await contacts.getContactById(contactId);
   // const result = await Contact.findOne({ _id: contactId });
   const result = await Contact.findById(contactId);
   if (!result) {
@@ -29,7 +27,6 @@ const addContact = async (req, res) => {
 
 const updateById = async (req, res) => {
   const { contactId } = req.params;
-  // const result = await contacts.updateContact(contactId, req.body);
   const result = await Contact.findByIdAndUpdate(contactId, req.body, {
     new: true,
   });
@@ -38,6 +35,7 @@ const updateById = async (req, res) => {
   }
   res.status(201).json(result);
 };
+
 const updateFavorite = async (req, res) => {
   const { contactId } = req.params;
   const result = await Contact.findByIdAndUpdate(contactId, req.body, {
