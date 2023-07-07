@@ -17,7 +17,7 @@ const getById = async (req, res) => {
   // const result = await Contact.findOne({ _id: contactId });
   const result = await Contact.findById(contactId);
   if (!result) {
-    throw HttpError(404, "Not found id");
+    throw HttpError(404, "ID not found");
   }
   res.json(result);
 };
@@ -34,7 +34,7 @@ const updateById = async (req, res) => {
     new: true,
   });
   if (!result) {
-    throw HttpError(404, "Not contact found");
+    throw HttpError(404, "Contact not found");
   }
   res.status(201).json(result);
 };
@@ -44,7 +44,7 @@ const updateFavorite = async (req, res) => {
     new: true,
   });
   if (!result) {
-    throw HttpError(400, "missing field favorite");
+    throw HttpError(400, "Missing field favorite");
   }
   res.status(200).json(result);
 };
