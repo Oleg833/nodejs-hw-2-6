@@ -2,6 +2,9 @@ const { Schema, model } = require("mongoose");
 const Joi = require("joi");
 
 const { handleMongooseError } = require("../helpers/");
+
+const subscriptionList = ["starter", "pro", "business"];
+
 const emailRegexp =
   /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$/;
 
@@ -11,22 +14,23 @@ const userSchema = new Schema(
       type: String,
       required: true,
     },
-    email: {
-      type: String,
-      required: true,
-      unique: true,
-      // validate: {
-      //   validator: function (v) {
-      //     return emailRegexp.test(v);
-      //   },
-      //   message: (props) => `${props.value} is not a valid email`,
-      // },
-    },
     password: {
       type: String,
-      required: true,
+      required: [true, "Set password for user"],
       minlenght: 6,
     },
+    email: {
+      type: String,
+      match: emailRegexp,
+      required: [true, "Email is required"],
+      unique: true,
+    },
+    subscription: {
+      type: String,
+      enum: subscriptionList,
+      default: "starter",
+    },
+    token: String,
   },
   { versionKey: false, timestamps: true }
 );
@@ -35,6 +39,7 @@ userSchema.post("save", handleMongooseError);
 
 const registerSchema = Joi.object({
   name: Joi.string().required(),
+  subscription: Joi.string(),
   email: Joi.string().pattern(emailRegexp).required(),
   password: Joi.string().min(6).required(),
 });
@@ -53,3 +58,29 @@ module.exports = {
   User,
   schemas,
 };
+
+// const userSchema = new Schema(
+//   {
+//     name: {
+//       type: String,
+//       required: true,
+//     },
+//     email: {
+//       type: String,
+//       required: true,
+//       unique: true,
+//       validate: {
+//         validator: function (v) {
+//           return emailRegexp.test(v);
+//         },
+//         message: (props) => `${props.value} is not a valid email`,
+//       },
+//     },
+//     password: {
+//       type: String,
+//       required: true,
+//       minlenght: 6,
+//     },
+//   },
+//   { versionKey: false, timestamps: true }
+// );

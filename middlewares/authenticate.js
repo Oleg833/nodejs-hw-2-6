@@ -10,6 +10,7 @@ const authenticate = async (req, res, next) => {
     if (!user) {
       next(HttpError(401, "Invalid token"));
     }
+    req.user = user;
     next();
   } catch (error) {
     res.status(401).json({ message: "Invalid token" });

@@ -14,15 +14,16 @@ const register = async (req, res, next) => {
 
   const newUser = await User.create({ ...req.body, password: hashPassword });
   res.status(201).json({
-    email: newUser.email,
     name: newUser.name,
+    email: newUser.email,
+    subscription: newUser.subscription,
   });
 };
 const login = async (req, res, next) => {
   const { email, password } = req.body;
   const user = await User.findOne({ email });
   if (!user) {
-    return next(HttpError(401, "Invalid credentials"));
+    return next(HttpError(401, "User not found"));
   }
   const isMatch = await bcrypt.compare(password, user.password);
   if (!isMatch) {

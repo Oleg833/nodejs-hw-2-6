@@ -3,6 +3,8 @@ const Joi = require("joi");
 
 const { handleMongooseError } = require("../helpers/handleMongooseError.js");
 
+// const subscriptionList = ["starter", "pro", "business"];
+
 const contactSchema = new Schema(
   {
     name: {
@@ -21,6 +23,11 @@ const contactSchema = new Schema(
       type: Boolean,
       default: false,
     },
+    owner: {
+      type: Schema.Types.ObjectId,
+      ref: "user",
+      required: [true, "Set owner for contact"],
+    },
   },
   { versionKey: false, timestamps: true }
 );
@@ -34,6 +41,7 @@ const addSchema = Joi.object({
     })
     .required(),
   phone: Joi.string(),
+  // owner: Joi.string(),
   favorite: Joi.boolean(),
 });
 
