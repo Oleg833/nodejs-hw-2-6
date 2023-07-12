@@ -7,13 +7,13 @@ const authenticate = async (req, res, next) => {
     const token = req.headers.authorization.split(" ")[1];
     const { id } = jwt.verify(token, process.env.JWT_SECRET);
     const user = await User.findById(id);
-    if (!user) {
+    if (!user || !user.token || user.token !== token) {
       next(HttpError(401, "Invalid token"));
     }
     req.user = user;
     next();
   } catch (error) {
-    res.status(401).json({ message: "Invalid token" });
+    res.status(401).json({ message: error.message });
   }
 };
 module.exports = { authenticate };

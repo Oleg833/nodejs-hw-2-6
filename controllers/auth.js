@@ -33,15 +33,34 @@ const login = async (req, res, next) => {
     id: user._id,
   };
   const token = jwt.sign(payload, SECRET_KEY, { expiresIn: "23h" });
+  await User.findByIdAndUpdate(user._id, { token });
 
   res.status(200).json({
     token,
   });
 };
 
+const getCurrentUser = (req, res) => {
+  const { email, name } = req.user;
+  res.status(200).json({
+    name,
+    email,
+  });
+};
+
+const logout = async (req, res) => {
+  const { _id } = req.user;
+  await User.findByIdAndUpdate(_id, { token: "" });
+  res.status(200).json({
+    message: "User logged out",
+  });
+};
+
 module.exports = {
   register: ctrlWrapper(register),
   login: ctrlWrapper(login),
+  getCurrentUser: ctrlWrapper(getCurrentUser),
+  logout: ctrlWrapper(logout),
 };
 
 // const error = new Error("User already exists");
