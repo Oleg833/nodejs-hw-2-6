@@ -51,9 +51,17 @@ const loginSchema = Joi.object({
   password: Joi.string().min(6).required(),
 });
 
+const subscriptionSchema = Joi.object({
+  subscription: Joi.string()
+    .valid(...subscriptionList)
+    .required()
+    .messages({ "any.required": "Missing field subscription" }),
+});
+
 const schemas = {
   registerSchema,
   loginSchema,
+  subscriptionSchema,
 };
 const User = model("user", userSchema);
 
@@ -61,29 +69,3 @@ module.exports = {
   User,
   schemas,
 };
-
-// const userSchema = new Schema(
-//   {
-//     name: {
-//       type: String,
-//       required: true,
-//     },
-//     email: {
-//       type: String,
-//       required: true,
-//       unique: true,
-//       validate: {
-//         validator: function (v) {
-//           return emailRegexp.test(v);
-//         },
-//         message: (props) => `${props.value} is not a valid email`,
-//       },
-//     },
-//     password: {
-//       type: String,
-//       required: true,
-//       minlenght: 6,
-//     },
-//   },
-//   { versionKey: false, timestamps: true }
-// );
