@@ -3,6 +3,10 @@ const jwt = require("jsonwebtoken");
 const { User } = require("../models/user");
 const { HttpError, ctrlWrapper } = require("../helpers");
 const { JWT_SECRET } = process.env;
+const gravatar = require("gravatar");
+const path = require("path");
+const jimp = require("jimp");
+const fs = require("fs/promises");
 
 const register = async (req, res, next) => {
   const { email, password } = req.body;
@@ -10,15 +14,22 @@ const register = async (req, res, next) => {
   if (user) {
     return next(HttpError(409, "User already exists"));
   }
+  const avatarURL = gravatar.url(email);
   const hashPassword = await bcrypt.hash(password, 10);
 
-  const newUser = await User.create({ ...req.body, password: hashPassword });
+  const newUser = await User.create({
+    ...req.body,
+    password: hashPassword,
+    avatarURL: avatarURL,
+  });
   res.status(201).json({
     name: newUser.name,
     email: newUser.email,
     subscription: newUser.subscription,
+    avatarURL: newUser.avatarURL,
   });
 };
+
 const login = async (req, res, next) => {
   const { email, password } = req.body;
   const user = await User.findOne({ email });
@@ -65,10 +76,37 @@ const updateSubscription = async (req, res) => {
   res.status(200).json(result);
 };
 
+const updateAvatar = async (req, res) => {
+  const { _id } = req.user;
+  const { path: tempUpload, originalname } = req.file;
+  const filename = `${_id}_${originalname}`;
+  const img = await jimp.read(tempUpload);
+
+  const resultUpload = path.join(
+    __dirname,
+    "../",
+    "public",
+    "avatars",
+    filename
+  );
+
+  await img
+    .autocrop()
+    .resize(250, 250, jimp.RESIZE_BEZIER)
+    .writeAsync(resultUpload);
+
+  await fs.unlink(tempUpload);
+
+  const avatarURL = path.join("avatars", filename);
+  await User.findByIdAndUpdate(_id, { avatarURL }, { new: true });
+  res.status(201).json(avatarURL);
+};
+
 module.exports = {
   register: ctrlWrapper(register),
   login: ctrlWrapper(login),
   getCurrentUser: ctrlWrapper(getCurrentUser),
   logout: ctrlWrapper(logout),
   updateSubscription: ctrlWrapper(updateSubscription),
+  updateAvatar: ctrlWrapper(updateAvatar),
 };
